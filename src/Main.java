@@ -14,23 +14,27 @@ public class Main {
             alph=al_en;
         }
         System.out.println("Укажіть шлях до файлу:");
-        String path = scanner.nextLine();
+        String path = scanner.next();
+
         System.out.println("Оберіть дію: 1 - Шифруємо файл, 2 - Дешифруємо");
-        int var = scanner.nextInt();
+        var = scanner.nextInt();
         if (var==1) {
             System.out.println("Укажіть ключ шифрування:");
             int key = scanner.nextInt();
-            encrypt(path, key);
+            encrypt(alph, path, key);
         } else {
             System.out.println("Укажіть ключ дешифрування, якщо 0 то буде виконо метобом брут-форсу:");
             int key = scanner.nextInt();
-            decrypt(path, key);
+            decrypt(alph, path, key);
         }
-        System.out.println("Перевыряйте, зроблено!");
+        System.out.println("Перевiряйте, зроблено!");
     }
 
     private static void encrypt(String alph, String path, int key){
-
+        char[] m_al = alph.toCharArray();
+        for (int i = 0; i < m_al.length; i++) {
+            System.out.println(m_al[i]);
+        }
     }
     private static void decrypt(String alph, String path, int key){
 
