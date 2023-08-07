@@ -7,8 +7,8 @@ import java.util.Scanner;
 
 
 public class Main {
-    private static final String [] corr_ua = {"кот","хат","привіт","дякую","будь ласка","так","ні","добре",
-            "до побачення","як","справи","вас","звати","мене","звуть","також","дуже","велике","маленьке",
+    private static final String [] CORRECTUA = {"кот","хат","привіт","дякую","будь ласка","добре",
+            "до побачення","справи","вас","звати","мене","звуть","також","дуже","велике","маленьке",
             "більше","менше","день","рік","місяць","тиждень","хліб","вода","сонце","місяць","зірка","небо",
             "дерево","квітка","мова","книга","школа","університет","місто","село","дорога","парк","музей",
             "ресторан","магазин","будинок","квартира","кімната","ліжко","стіл","стілець","телефон","комп'ютер",
@@ -27,7 +27,7 @@ public class Main {
             "навчати","надія","намалювати","насолоджуватися","настрій","настільна","наступний","небо","невеликий",
             "невідомий","неділя","недовго","недорогий","незабаром","немає","необхідний","ніч","ночі","обіцяти",
             "обіцяю","обіцяють","обрати","оголошення","одяг","озеро","око","олівець","осінь","особливо","отець",
-            "очі","палець","парк","парта","пенал","пензлик","передача","переклад","перекладач","перша","перший",
+            "палець","парк","парта","пенал","пензлик","передача","переклад","перекладач","перша","перший",
             "підлога","підлоги","підніматися","після","пісня","піцца","плащ","плітка","по-справжньому","погано",
             "погода","подорож","покоївка","поле","помідор","пора","поруч","поспішати","постачати","починаючи",
             "почуття","працювати","прекрасний","приймати","примара","примарно","принести","принц","програма",
@@ -42,19 +42,33 @@ public class Main {
             "там","танок","тата","тварина","телефон","темний","термін","тесляр","тетя","тиждень","тижня","тиран",
             "тобі","товариш","той"
             };
-    private static final String al_ua = "йцукенгшщзхїфівапролджєячсмитьбю,.':-!?ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄЯЧСМИТЬБЮ";
+    private static final String ALPHABETUA = "йцукенгшщзхїфівапролджєячсмитьбю ,.':-!?";
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         int var;
-        String alph = al_ua;
-        String path;
+        int key;
+        String action="";
+        String alphabet = ALPHABETUA;
+        String pathIn;
         String pathOut;
+
+        System.out.println("Оберіть дію: 1 - Шифруємо файл, 2 - Дешифруємо");
+        var = scanner.nextInt();
+        if (var==1) {
+            System.out.println("Укажіть ключ шифрування:");
+            key = scanner.nextInt();
+            action="_enc";
+        }else {
+            System.out.println("Укажіть ключ дешифрування, якщо 0 то буде виконо метобом брут-форсу:");
+            key = scanner.nextInt();
+            action="_dec";
+        }
 
         while (true) {
             System.out.println("Укажіть шлях до файлу:");
-            path = scanner.next();
+            pathIn = scanner.next();
 
-            Path pathFile = Path.of(path);
+            Path pathFile = Path.of(pathIn);
             if (!Files.isRegularFile(pathFile)) {
                 System.out.println("Файл не існує, повтори введення");
             } else {
@@ -63,51 +77,47 @@ public class Main {
                 String fileNameWithoutExtension = fileName.substring(0, (fileName.lastIndexOf('.')==-1) ? fileName.length() : fileName.lastIndexOf('.'));
                 String fileNameExtension = fileName.substring((fileName.lastIndexOf('.')==-1) ? 0 :  fileName.lastIndexOf('.'));
 
-                pathOut = pathFile.getParent().toString()+"\\"+fileNameWithoutExtension+"_res"+fileNameExtension;
+                pathOut = pathFile.getParent().toString()+"\\"+fileNameWithoutExtension+action+fileNameExtension;
                 break;
             }
         }
 
-        System.out.println("Оберіть дію: 1 - Шифруємо файл, 2 - Дешифруємо");
-        var = scanner.nextInt();
+
         if (var==1) {
-            System.out.println("Укажіть ключ шифрування:");
-            int key = scanner.nextInt();
-            encrypt(alph, path, pathOut, key);
+            encrypt(alphabet, pathIn, pathOut, key);
         } else {
-            System.out.println("Укажіть ключ дешифрування, якщо 0 то буде виконо метобом брут-форсу:");
-            int key = scanner.nextInt();
             if (key==0){
-                decrypt_BF(alph, path, pathOut);
+                decryptBrutForce(alphabet, pathIn, pathOut);
             }else {
-                decrypt(alph, path, pathOut, key);
+                decrypt(alphabet, pathIn, pathOut, key);
             }
         }
         System.out.println("Перевiряйте, зроблено!");
+        System.out.println("Шлях до файлу: "+pathOut);
     }
     private static void encrypt(String alph, String path, String pathOut, int key){
-        char[] m_al = alph.toCharArray();
-        int kvo = m_al.length-1;
+        char[] masAlphabet = alph.toCharArray();
+        int quantity = masAlphabet.length-1;
 
         try (FileReader fileRead = new FileReader(path);
              FileWriter filewriter = new FileWriter(pathOut);
              BufferedReader reader = new BufferedReader(fileRead) ) {
 
             while (reader.ready()) {
-                String  str = reader.readLine();
+                String  str = reader.readLine().toLowerCase();
                 String  newStr="";
                 for(int i=0; i<str.length(); i++) {
                     char chr = str.charAt(i);
-                    int index = searchInArray(m_al,chr);
+                    int index = searchInArray(masAlphabet,chr);
                     if (index==-1){
                         newStr = newStr +chr;
 
                     }else {
                         int newIndex = index+key;
-                        if (newIndex>kvo){
-                            newIndex=newIndex-m_al.length;
+                        if (newIndex>quantity){
+                            newIndex=newIndex-masAlphabet.length;
                         }
-                        newStr = newStr +m_al[newIndex];
+                        newStr = newStr +masAlphabet[newIndex];
                     }
 
                 }
@@ -118,28 +128,28 @@ public class Main {
         }
     }
     private static void decrypt(String alph, String path, String pathOut, int key){
-        char[] m_al = alph.toCharArray();
-        int kvo = m_al.length-1;
+        char[] masAlphabet = alph.toCharArray();
+        int quantity = masAlphabet.length-1;
 
         try (FileReader fileRead = new FileReader(path);
              FileWriter filewriter = new FileWriter(pathOut);
              BufferedReader reader = new BufferedReader(fileRead) ) {
 
             while (reader.ready()) {
-                String  str = reader.readLine();
+                String  str = reader.readLine().toLowerCase();
                 String  newStr="";
                 for(int i=0; i<str.length(); i++) {
                     char chr = str.charAt(i);
-                    int index = searchInArray(m_al,chr);
+                    int index = searchInArray(masAlphabet,chr);
                     if (index==-1){
                         newStr = newStr +chr;
 
                     }else {
                         int newIndex = index-key;
                         if (newIndex<0){
-                            newIndex=newIndex+m_al.length;
+                            newIndex=newIndex+ masAlphabet.length;
                         }
-                        newStr = newStr +m_al[newIndex];
+                        newStr = newStr + masAlphabet[newIndex];
                     }
                 }
                 filewriter.write(newStr);
@@ -148,11 +158,11 @@ public class Main {
             System.out.println("(decrypt) Щось пішло не так: " + e);
         }
     }
-    private static void decrypt_BF(String alph, String path, String pathOut){
-        char[] m_al = alph.toCharArray();
-        int kvo = m_al.length-1;
+    private static void decryptBrutForce(String alph, String path, String pathOut){
+        char[] masAlphabet = alph.toCharArray();
+        int quantity = masAlphabet.length-1;
         boolean ok = false;
-        for (int key = 0; key < m_al.length; key++) {
+        for (int key = 1; key < masAlphabet.length; key++) {
             if (ok){
                 break;
             }
@@ -161,20 +171,20 @@ public class Main {
                  BufferedReader reader = new BufferedReader(fileRead) ) {
 
                 while (reader.ready()) {
-                    String  str = reader.readLine();
+                    String  str = reader.readLine().toLowerCase();
                     String  newStr="";
                     for(int i=0; i<str.length(); i++) {
                         char chr = str.charAt(i);
-                        int index = searchInArray(m_al,chr);
+                        int index = searchInArray(masAlphabet,chr);
                         if (index==-1){
                             newStr = newStr +chr;
 
                         }else {
                             int newIndex = index+key;
-                            if (newIndex>kvo){
-                                newIndex=newIndex-m_al.length;
+                            if (newIndex>quantity){
+                                newIndex=newIndex-masAlphabet.length;
                             }
-                            newStr = newStr +m_al[newIndex];
+                            newStr = newStr +masAlphabet[newIndex];
                         }
 
                     }
@@ -184,7 +194,7 @@ public class Main {
                     }
                 }
             } catch (Exception e) {
-                System.out.println("(decrypt_BF) Щось пішло не так: " + e);
+                System.out.println("(decryptBrutForce) Щось пішло не так: " + e);
             }
         }
     }
@@ -200,9 +210,13 @@ public class Main {
     }
     private static boolean searchInArray(String str ){
         boolean res=false;
-        String str_temp = str.toLowerCase();
-        for (int i = 0; i < corr_ua.length; i++) {
-            if (str_temp.indexOf(corr_ua[i])>=0){
+        int y=0;
+        String strTemp = str.toLowerCase();
+        for (int i = 0; i < CORRECTUA.length; i++) {
+            if (strTemp.indexOf(CORRECTUA[i])>=0){
+               y++;
+            }
+            if (y>5){
                 res=true;
                 break;
             }
@@ -210,5 +224,3 @@ public class Main {
         return res;
     }
 }
-//d:\Temp\orig.txt
-//d:\Temp\orig_res.txt
